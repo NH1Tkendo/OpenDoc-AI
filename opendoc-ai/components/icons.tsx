@@ -15,7 +15,8 @@ import {
   Copy,
   Check,
   AlertCircle,
-  Loader2
+  Loader2,
+  Save
 } from 'lucide-react'
 
 export const Icons = {
@@ -36,6 +37,7 @@ export const Icons = {
   Check,
   Alert: AlertCircle,
   Spinner: Loader2,
+  Save,
   Github: ({ className }: { className?: string }) => (
     <svg
       viewBox="0 0 24 24"
