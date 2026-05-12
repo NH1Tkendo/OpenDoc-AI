@@ -1,0 +1,4 @@
+- terminal-ops
+- repo-scan
+- context7-mcp
+- git-workflow
