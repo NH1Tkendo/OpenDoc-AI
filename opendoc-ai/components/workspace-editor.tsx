@@ -35,12 +35,6 @@ export function WorkspaceEditor({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (repoUrl) {
-      analyzeRepo(repoUrl)
-    }
-  }, [repoUrl])
-
   const analyzeRepo = async (url: string) => {
     setIsLoading(true)
     setError(null)
@@ -59,13 +53,20 @@ export function WorkspaceEditor({
       const data = await response.json()
       const nestedTree = convertToTree(data.tree)
       setTree(nestedTree)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message)
       console.error('Analysis error:', err)
     } finally {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (repoUrl) {
+      analyzeRepo(repoUrl)
+    }
+  }, [repoUrl])
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">

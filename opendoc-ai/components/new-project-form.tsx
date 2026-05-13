@@ -53,8 +53,9 @@ export function NewProjectForm() {
 
       // 4. Redirect to the new project workspace
       router.push(`/workspace/${project.id}`)
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message)
       console.error('New project error:', err)
     } finally {
       setIsLoading(false)
