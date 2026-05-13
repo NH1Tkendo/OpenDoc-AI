@@ -70,3 +70,47 @@ export function getPriorityFiles(files: GitHubTreeItem[]) {
     return priorityPatterns.some((pattern) => pattern.test(fileName) || pattern.test(file.path));
   });
 }
+
+export interface TreeNode {
+  name: string;
+  path: string;
+  type: 'blob' | 'tree';
+  children?: TreeNode[];
+}
+
+export function convertToTree(files: { path: string; type: string }[]): TreeNode[] {
+  const root: TreeNode[] = [];
+
+  files.forEach((file) => {
+    const parts = file.path.split('/');
+    let currentLevel = root;
+
+    parts.forEach((part, index) => {
+      const path = parts.slice(0, index + 1).join('/');
+      const isLast = index === parts.length - 1;
+      let node = currentLevel.find((n) => n.name === part);
+
+      if (!node) {
+        node = {
+          name: part,
+          path: path,
+          type: isLast ? (file.type as 'blob' | 'tree') : 'tree',
+          children: isLast ? undefined : [],
+        };
+        currentLevel.push(node);
+        
+        // Sort: folders first, then alphabetically
+        currentLevel.sort((a, b) => {
+          if (a.type === b.type) return a.name.localeCompare(b.name);
+          return a.type === 'tree' ? -1 : 1;
+        });
+      }
+
+      if (node.children) {
+        currentLevel = node.children;
+      }
+    });
+  });
+
+  return root;
+}

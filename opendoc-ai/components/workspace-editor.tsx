@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { Icons } from '@/components/icons'
 import { Button } from '@/components/ui/button'
+import { TreeNode, convertToTree } from '@/lib/repo-utils'
 import '@uiw/react-md-editor/markdown-editor.css'
 import '@uiw/react-markdown-preview/markdown.css'
 
@@ -20,14 +21,51 @@ const MDPreview = dynamic(
 interface WorkspaceEditorProps {
   initialContent?: string
   projectName?: string
+  repoUrl?: string
 }
 
 export function WorkspaceEditor({ 
   initialContent = '# Chào mừng bạn đến với OpenDoc AI\n\nBắt đầu viết tài liệu của bạn ở đây...', 
-  projectName = 'Dự án không tên' 
+  projectName = 'Dự án không tên',
+  repoUrl
 }: WorkspaceEditorProps) {
   const [content, setContent] = useState(initialContent)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+  const [tree, setTree] = useState<TreeNode[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (repoUrl) {
+      analyzeRepo(repoUrl)
+    }
+  }, [repoUrl])
+
+  const analyzeRepo = async (url: string) => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const response = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to analyze repository')
+      }
+
+      const data = await response.json()
+      const nestedTree = convertToTree(data.tree)
+      setTree(nestedTree)
+    } catch (err: any) {
+      setError(err.message)
+      console.error('Analysis error:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -67,21 +105,23 @@ export function WorkspaceEditor({
               <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Cấu trúc dự án
               </span>
+              {isLoading && <Icons.Spinner className="h-3 w-3 animate-spin text-muted-foreground" />}
             </div>
-            <div className="space-y-1">
-              {/* Dummy file tree for now */}
-              <div className="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted cursor-pointer">
-                <Icons.Folder className="h-4 w-4 text-primary/70" />
-                <span>src</span>
+            
+            {error && (
+              <div className="mb-4 rounded-md bg-destructive/10 p-2 text-xs text-destructive">
+                {error}
               </div>
-              <div className="ml-4 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground bg-primary/10 hover:bg-primary/20 cursor-pointer">
-                <Icons.FileText className="h-4 w-4 text-primary" />
-                <span>README.md</span>
-              </div>
-              <div className="ml-4 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground hover:bg-muted cursor-pointer">
-                <Icons.Code className="h-4 w-4 text-muted-foreground" />
-                <span>index.ts</span>
-              </div>
+            )}
+
+            <div className="space-y-0.5">
+              {tree.length > 0 ? (
+                tree.map((node) => <FileTreeItem key={node.path} node={node} level={0} />)
+              ) : !isLoading && (
+                <div className="text-center py-4">
+                  <span className="text-xs text-muted-foreground italic">Không có dữ liệu</span>
+                </div>
+              )}
             </div>
           </aside>
         )}
@@ -120,6 +160,49 @@ export function WorkspaceEditor({
           </div>
         </main>
       </div>
+    </div>
+  )
+}
+
+function FileTreeItem({ node, level }: { node: TreeNode; level: number }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const isFolder = node.type === 'tree'
+
+  return (
+    <div>
+      <div
+        className="flex items-center gap-1.5 rounded-md px-2 py-1 text-sm text-foreground hover:bg-muted cursor-pointer transition-colors"
+        style={{ paddingLeft: `${level * 12 + 8}px` }}
+        onClick={() => isFolder && setIsOpen(!isOpen)}
+      >
+        {isFolder ? (
+          <>
+            {isOpen ? (
+              <Icons.ChevronDown className="h-3 w-3 text-muted-foreground" />
+            ) : (
+              <Icons.ChevronRight className="h-3 w-3 text-muted-foreground" />
+            )}
+            <Icons.Folder className="h-3.5 w-3.5 text-primary/70" />
+          </>
+        ) : (
+          <>
+            <div className="w-3" />
+            {node.name.endsWith('.md') ? (
+              <Icons.FileText className="h-3.5 w-3.5 text-primary" />
+            ) : (
+              <Icons.Code className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
+          </>
+        )}
+        <span className="truncate">{node.name}</span>
+      </div>
+      {isFolder && isOpen && node.children && (
+        <div>
+          {node.children.map((child) => (
+            <FileTreeItem key={child.path} node={child} level={level + 1} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
