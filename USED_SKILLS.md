@@ -4,3 +4,4 @@
 - git-workflow
 - frontend-design
 - frontend-patterns
+- deployment-patterns
