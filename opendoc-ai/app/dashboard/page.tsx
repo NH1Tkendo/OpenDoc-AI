@@ -1,24 +1,26 @@
-import { getServerClient } from '@/lib/supabase'
-import { redirect } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { Icons } from '@/components/icons'
-import Link from 'next/link'
+import { getServerClient } from "@/lib/supabase-server";
+import { redirect } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Icons } from "@/components/icons";
+import Link from "next/link";
 
 export default async function DashboardPage() {
-  const supabase = await getServerClient()
-  const { data: { session } } = await supabase.auth.getSession()
+  const supabase = await getServerClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
   if (!session) {
-    redirect('/login')
+    redirect("/login");
   }
 
   const { data: projects, error } = await supabase
-    .from('projects')
-    .select('*')
-    .order('created_at', { ascending: false })
+    .from("projects")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
-    console.error('Error fetching projects:', error)
+    console.error("Error fetching projects:", error);
   }
 
   return (
@@ -75,13 +77,13 @@ export default async function DashboardPage() {
                     {project.repo_name}
                   </h3>
                   <p className="line-clamp-2 text-sm text-muted-foreground">
-                    {project.description || 'Không có mô tả'}
+                    {project.description || "Không có mô tả"}
                   </p>
                 </div>
                 <div className="mt-6 flex items-center text-xs text-muted-foreground">
                   <span className="flex items-center">
                     <Icons.Github className="mr-1 h-3 w-3" />
-                    {project.repo_url.split('/').slice(-2).join('/')}
+                    {project.repo_url.split("/").slice(-2).join("/")}
                   </span>
                 </div>
               </Link>
@@ -105,5 +107,5 @@ export default async function DashboardPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,20 +1,20 @@
-import { getServerClient } from '@/lib/supabase'
-import { NextResponse } from 'next/server'
+import { getServerClient } from "@/lib/supabase-server";
+import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const supabase = await getServerClient()
+  const supabase = await getServerClient();
 
   // Check if we have a session
   const {
     data: { session },
-  } = await supabase.auth.getSession()
+  } = await supabase.auth.getSession();
 
   if (session) {
-    await supabase.auth.signOut()
+    await supabase.auth.signOut();
   }
 
-  const url = new URL(request.url)
+  const url = new URL(request.url);
   return NextResponse.redirect(`${url.origin}/login`, {
     status: 301,
-  })
+  });
 }
