@@ -134,7 +134,8 @@ export function WorkspaceEditor({
         content,
         status,
       })
-      // Could show a success toast here
+      // Simple visual feedback
+      alert(status === 'completed' ? 'Đã lưu hoàn thành!' : 'Đã lưu nháp!')
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save document';
       setError(message)
@@ -142,6 +143,27 @@ export function WorkspaceEditor({
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content)
+      alert('Đã sao chép vào bộ nhớ tạm!')
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  const handleDownload = () => {
+    const blob = new Blob([content], { type: 'text/markdown' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'README.md'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   useEffect(() => {
@@ -241,9 +263,19 @@ export function WorkspaceEditor({
           <div className="grid w-full grid-cols-2 divide-x divide-border">
             {/* Editor Column */}
             <div className="flex flex-col overflow-hidden" data-color-mode="light">
-              <div className="flex h-10 items-center border-b border-border bg-muted/20 px-4 text-xs font-medium text-muted-foreground">
-                <Icons.Edit className="mr-2 h-3 w-3" />
-                EDITOR
+              <div className="flex h-10 items-center justify-between border-b border-border bg-muted/20 px-4">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  <Icons.Edit className="mr-2 h-3 w-3" />
+                  EDITOR
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy} title="Copy Markdown">
+                    <Icons.Copy className="h-3 w-3" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleDownload} title="Download README.md">
+                    <Icons.Download className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
               <div className="flex-1 overflow-auto">
                 <MDEditor
@@ -259,9 +291,16 @@ export function WorkspaceEditor({
 
             {/* Preview Column */}
             <div className="flex flex-col overflow-hidden">
-              <div className="flex h-10 items-center border-b border-border bg-muted/20 px-4 text-xs font-medium text-muted-foreground">
-                <Icons.Preview className="mr-2 h-3 w-3" />
-                PREVIEW
+              <div className="flex h-10 items-center justify-between border-b border-border bg-muted/20 px-4">
+                <div className="flex items-center text-xs font-medium text-muted-foreground">
+                  <Icons.Preview className="mr-2 h-3 w-3" />
+                  PREVIEW
+                </div>
+                <div className="flex items-center gap-2">
+                   <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy} title="Copy Markdown">
+                    <Icons.Copy className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
               <div className="flex-1 overflow-auto p-8 prose prose-sm dark:prose-invert max-w-none">
                 <MDPreview source={content} />
