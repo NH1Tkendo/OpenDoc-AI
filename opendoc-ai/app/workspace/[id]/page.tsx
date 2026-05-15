@@ -44,6 +44,7 @@ export default async function WorkspacePage({ params }: WorkspacePageProps) {
 
   return (
     <WorkspaceEditor
+      projectId={id}
       initialContent={document?.content}
       projectName={project.repo_name}
       repoUrl={project.repo_url}

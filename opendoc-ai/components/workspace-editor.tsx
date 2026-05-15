@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { Icons } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { TreeNode, convertToTree } from '@/lib/repo-utils'
+import { saveDocument } from '@/app/actions/project'
 import '@uiw/react-md-editor/markdown-editor.css'
 import '@uiw/react-markdown-preview/markdown.css'
 
@@ -19,6 +20,7 @@ const MDPreview = dynamic(
 )
 
 interface WorkspaceEditorProps {
+  projectId?: string
   initialContent?: string
   projectName?: string
   repoUrl?: string
@@ -33,6 +35,7 @@ interface RepoData {
 }
 
 export function WorkspaceEditor({ 
+  projectId,
   initialContent = '# Chào mừng bạn đến với OpenDoc AI\n\nBắt đầu viết tài liệu của bạn ở đây...', 
   projectName = 'Dự án không tên',
   repoUrl
@@ -42,6 +45,7 @@ export function WorkspaceEditor({
   const [tree, setTree] = useState<TreeNode[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [repoData, setRepoData] = useState<RepoData | null>(null)
 
@@ -119,6 +123,27 @@ export function WorkspaceEditor({
     }
   }
 
+  const handleSave = async (status: 'draft' | 'completed') => {
+    if (!projectId) return
+
+    setIsSaving(true)
+    setError(null)
+    try {
+      await saveDocument({
+        projectId,
+        content,
+        status,
+      })
+      // Could show a success toast here
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save document';
+      setError(message)
+      console.error('Save error:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   useEffect(() => {
     if (repoUrl) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -161,16 +186,26 @@ export function WorkspaceEditor({
             {isGenerating ? 'Đang tạo...' : 'Tạo với AI'}
           </Button>
           <div className="h-4 w-px bg-border mx-1" />
-          <Button variant="outline" size="sm">
-            <Icons.Save className="mr-2 h-4 w-4" />
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => handleSave('draft')}
+            disabled={!projectId || isSaving}
+          >
+            {isSaving ? <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" /> : <Icons.Save className="mr-2 h-4 w-4" />}
             Lưu nháp
           </Button>
-          <Button size="sm">
-            <Icons.Check className="mr-2 h-4 w-4" />
+          <Button 
+            size="sm"
+            onClick={() => handleSave('completed')}
+            disabled={!projectId || isSaving}
+          >
+            {isSaving ? <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" /> : <Icons.Check className="mr-2 h-4 w-4" />}
             Hoàn thành
           </Button>
         </div>
       </header>
+
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
