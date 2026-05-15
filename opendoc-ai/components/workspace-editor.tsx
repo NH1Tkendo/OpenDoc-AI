@@ -24,6 +24,14 @@ interface WorkspaceEditorProps {
   repoUrl?: string
 }
 
+interface RepoData {
+  owner: string;
+  repo: string;
+  fullName: string;
+  tree: { path: string; type: string }[];
+  priorityFiles: { path: string; content: string }[];
+}
+
 export function WorkspaceEditor({ 
   initialContent = '# Chào mừng bạn đến với OpenDoc AI\n\nBắt đầu viết tài liệu của bạn ở đây...', 
   projectName = 'Dự án không tên',
@@ -33,7 +41,9 @@ export function WorkspaceEditor({
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [tree, setTree] = useState<TreeNode[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [repoData, setRepoData] = useState<RepoData | null>(null)
 
   const analyzeRepo = async (url: string) => {
     setIsLoading(true)
@@ -50,7 +60,8 @@ export function WorkspaceEditor({
         throw new Error(data.error || 'Failed to analyze repository')
       }
 
-      const data = await response.json()
+      const data = await response.json() as RepoData
+      setRepoData(data)
       const nestedTree = convertToTree(data.tree)
       setTree(nestedTree)
     } catch (err: unknown) {
@@ -62,11 +73,59 @@ export function WorkspaceEditor({
     }
   }
 
+  const generateDocs = async () => {
+    if (!repoData) return
+
+    setIsGenerating(true)
+    setError(null)
+    setContent('') // Clear content to start fresh
+
+    try {
+      const response = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          repoInfo: {
+            owner: repoData.owner,
+            repo: repoData.repo,
+            fullName: repoData.fullName,
+          },
+          tree: repoData.tree,
+          priorityFiles: repoData.priorityFiles,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to generate documentation')
+      }
+
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No response body')
+
+      const decoder = new TextDecoder()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value, { stream: true })
+        setContent((prev) => prev + chunk)
+      }
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(message)
+      console.error('Generation error:', err)
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
   useEffect(() => {
     if (repoUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       analyzeRepo(repoUrl)
     }
   }, [repoUrl])
+
 
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-background">
@@ -87,6 +146,21 @@ export function WorkspaceEditor({
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Button 
+            variant="default" 
+            size="sm" 
+            onClick={generateDocs}
+            disabled={!repoData || isGenerating || isLoading}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            {isGenerating ? (
+              <Icons.Spinner className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Icons.Code className="mr-2 h-4 w-4" />
+            )}
+            {isGenerating ? 'Đang tạo...' : 'Tạo với AI'}
+          </Button>
+          <div className="h-4 w-px bg-border mx-1" />
           <Button variant="outline" size="sm">
             <Icons.Save className="mr-2 h-4 w-4" />
             Lưu nháp
@@ -164,6 +238,7 @@ export function WorkspaceEditor({
     </div>
   )
 }
+
 
 function FileTreeItem({ node, level }: { node: TreeNode; level: number }) {
   const [isOpen, setIsOpen] = useState(false)
