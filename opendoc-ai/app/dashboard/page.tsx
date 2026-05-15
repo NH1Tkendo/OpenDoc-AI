@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
+import { ProjectCard } from "@/components/project-card";
 
 export default async function DashboardPage() {
   const supabase = await getServerClient();
@@ -53,40 +54,7 @@ export default async function DashboardPage() {
         {projects && projects.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {projects.map((project) => (
-              <Link
-                key={project.id}
-                href={`/workspace/${project.id}`}
-                className="group relative flex flex-col justify-between rounded-xl border border-border bg-card p-6 transition-all hover:border-primary/50 hover:shadow-md"
-              >
-                <div>
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="rounded-lg bg-primary/10 p-2 text-primary">
-                      <Icons.Folder className="h-6 w-6" />
-                    </div>
-                    <a
-                      href={project.repo_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Icons.ExternalLink className="h-4 w-4" />
-                    </a>
-                  </div>
-                  <h3 className="mb-2 text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
-                    {project.repo_name}
-                  </h3>
-                  <p className="line-clamp-2 text-sm text-muted-foreground">
-                    {project.description || "Không có mô tả"}
-                  </p>
-                </div>
-                <div className="mt-6 flex items-center text-xs text-muted-foreground">
-                  <span className="flex items-center">
-                    <Icons.Github className="mr-1 h-3 w-3" />
-                    {project.repo_url.split("/").slice(-2).join("/")}
-                  </span>
-                </div>
-              </Link>
+              <ProjectCard key={project.id} project={project} />
             ))}
           </div>
         ) : (
