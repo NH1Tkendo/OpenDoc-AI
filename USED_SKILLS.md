@@ -5,3 +5,4 @@
 - frontend-design
 - frontend-patterns
 - deployment-patterns
+- e2e-testing
