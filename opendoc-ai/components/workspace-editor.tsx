@@ -34,6 +34,7 @@ interface RepoData {
   priorityFiles: { path: string; content: string }[];
 }
 
+import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 
 // ... (inside the component)
@@ -44,6 +45,7 @@ export function WorkspaceEditor({
   projectName = 'Dự án không tên',
   repoUrl
 }: WorkspaceEditorProps) {
+  const router = useRouter()
   const { theme } = useTheme()
   const [content, setContent] = useState(initialContent)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -139,8 +141,12 @@ export function WorkspaceEditor({
         content,
         status,
       })
-      // Simple visual feedback
-      alert(status === 'completed' ? 'Đã lưu hoàn thành!' : 'Đã lưu nháp!')
+      
+      if (status === 'completed') {
+        router.push('/dashboard')
+      } else {
+        alert('Đã lưu nháp!')
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to save document';
       setError(message)
