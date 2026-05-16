@@ -1,8 +1,0 @@
-- terminal-ops
-- repo-scan
-- context7-mcp
-- git-workflow
-- frontend-design
-- frontend-patterns
-- deployment-patterns
-- e2e-testing
