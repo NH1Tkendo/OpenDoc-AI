@@ -13,8 +13,11 @@ export async function POST(request: Request) {
     await supabase.auth.signOut();
   }
 
-  const url = new URL(request.url);
-  return NextResponse.redirect(`${url.origin}/login`, {
-    status: 301,
+  // Ép sử dụng biến môi trường chứa tên miền thật làm gốc điều hướng
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://opendoc.ngobatai.dev';
+
+  // Đổi sang mã 303 hoặc 307 để trình duyệt xử lý redirect sau POST mượt mà hơn, không bị kẹt cache
+  return NextResponse.redirect(`${siteUrl}/login`, {
+    status: 303,
   });
 }
