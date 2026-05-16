@@ -34,12 +34,17 @@ interface RepoData {
   priorityFiles: { path: string; content: string }[];
 }
 
+import { useTheme } from 'next-themes'
+
+// ... (inside the component)
+
 export function WorkspaceEditor({ 
   projectId,
   initialContent = '# Chào mừng bạn đến với OpenDoc AI\n\nBắt đầu viết tài liệu của bạn ở đây...', 
   projectName = 'Dự án không tên',
   repoUrl
 }: WorkspaceEditorProps) {
+  const { theme } = useTheme()
   const [content, setContent] = useState(initialContent)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [tree, setTree] = useState<TreeNode[]>([])
@@ -262,7 +267,7 @@ export function WorkspaceEditor({
         <main className="flex flex-1 overflow-hidden">
           <div className="grid w-full grid-cols-2 divide-x divide-border">
             {/* Editor Column */}
-            <div className="flex flex-col overflow-hidden" data-color-mode="light">
+            <div className="flex flex-col overflow-hidden" data-color-mode={theme === 'light' ? 'light' : 'dark'}>
               <div className="flex h-10 items-center justify-between border-b border-border bg-muted/20 px-4">
                 <div className="flex items-center text-xs font-medium text-muted-foreground">
                   <Icons.Edit className="mr-2 h-3 w-3" />
