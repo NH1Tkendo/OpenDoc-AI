@@ -192,6 +192,16 @@ export function WorkspaceEditor({
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
+            size="sm"
+            onClick={() => router.push('/dashboard')}
+            className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+          >
+            <Icons.ChevronLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Dashboard</span>
+          </Button>
+          <div className="h-6 w-px bg-border" />
+          <Button
+            variant="ghost"
             size="icon"
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="h-8 w-8"
