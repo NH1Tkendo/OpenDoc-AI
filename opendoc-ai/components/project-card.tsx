@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Icons } from "@/components/icons";
+import { DeleteProjectButton } from "./delete-project-button";
+import { useRouter } from "next/navigation";
 
 interface ProjectCardProps {
   project: {
@@ -13,6 +15,8 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const router = useRouter();
+
   const handleExternalLinkClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -31,13 +35,20 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <div className="rounded-lg bg-primary/10 p-2 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
             <Icons.Folder className="h-6 w-6" />
           </div>
-          <button
-            onClick={handleExternalLinkClick}
-            className="text-muted-foreground hover:text-foreground pointer-events-auto transition-colors p-1"
-            aria-label="Open repository in new tab"
-          >
-            <Icons.ExternalLink className="h-4 w-4" />
-          </button>
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <button
+              onClick={handleExternalLinkClick}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              aria-label="Open repository in new tab"
+            >
+              <Icons.ExternalLink className="h-4 w-4" />
+            </button>
+            <DeleteProjectButton
+              projectId={project.id}
+              projectName={project.repo_name}
+              onSuccess={() => router.refresh()}
+            />
+          </div>
         </div>
         <h3 className="mb-2 text-xl font-semibold text-foreground group-hover:text-primary transition-colors duration-300">
           {project.repo_name}
