@@ -12,9 +12,8 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build Next.js and compile TypeScript for the socket server
+# Build Next.js
 RUN npm run build
-RUN npx tsc socket-server.ts --outDir ./dist --esModuleInterop --skipLibCheck --target esnext
 
 # Stage 3: Runner
 FROM node:20-alpine AS runner
@@ -28,11 +27,16 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Copy compiled socket server
-COPY --from=builder --chown=nextjs:nodejs /app/dist/socket-server.js ./socket-server.js
+# Copy thêm file socket-server.ts và package.json để chạy tsx
+COPY --from=builder --chown=nextjs:nodejs /app/socket-server.ts ./socket-server.ts
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Cài đặt tsx để chạy file .ts trực tiếp
+RUN npm install -g tsx
 
 # Script để chạy cả 2 process
-RUN echo 'node server.js & node socket-server.js' > run.sh && chmod +x run.sh
+RUN echo 'node server.js & tsx socket-server.ts' > run.sh && chmod +x run.sh
 
 USER nextjs
 
