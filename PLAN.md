@@ -7,7 +7,7 @@ Kế hoạch này chi tiết hóa các bước triển khai kỹ thuật cho phi
 ## Giai đoạn 1: Nền tảng Database & Analytics (Hệ thống ổn định)
 *Mục tiêu: Thiết lập cơ sở dữ liệu và các cơ chế thống kê tự động.*
 
-1.  [ ] **Thi công Database:** Chạy các script SQL trong `SETUP.md` trên Supabase.
+1.  [x] **Thi công Database:** Chạy các script SQL trong `SETUP.md` trên Supabase.
 2.  [ ] **Phân quyền Admin:**
     *   Thiết lập flag `is_admin` cho tài khoản admin trong Supabase.
     *   Cập nhật Middleware để chặn người dùng không phải admin truy cập `/dashboard`.
@@ -21,10 +21,10 @@ Kế hoạch này chi tiết hóa các bước triển khai kỹ thuật cho phi
 ## Giai đoạn 2: Quản lý API & Rate Limiting (Tối ưu tài nguyên)
 *Mục tiêu: Cho phép người dùng cấu hình key cá nhân và bảo vệ tài nguyên AI.*
 
-1.  [ ] **Trang Quản lý Cấu hình:** 
+1.  [x] **Trang Quản lý Cấu hình:** 
     *   Tạo form nhập Gemini Key, Supabase Keys.
     *   Tính năng "Check Connection": Gọi thử API Gemini `listModels()` để xác thực key.
-2.  [ ] **Logic Rate Limiting:**
+2.  [x] **Logic Rate Limiting:**
     *   Viết logic kiểm tra bảng `user_usage` trước khi gọi Gemini AI.
     *   Cập nhật `usage_count` sau mỗi lần tạo tài liệu thành công.
     *   Trả về thông báo lỗi thân thiện khi vượt quá hạn mức.
@@ -34,13 +34,13 @@ Kế hoạch này chi tiết hóa các bước triển khai kỹ thuật cho phi
 ## Giai đoạn 3: VPS CLI Integration (Nâng cao quản trị)
 *Mục tiêu: Nhúng Terminal trực tiếp vào Dashboard.*
 
-1.  [ ] **Cấu trúc lại Docker Server:**
+1.  [x] **Cấu trúc lại Docker Server:**
     *   Tạo file `server-custom.js` để tích hợp `Socket.io` vào Next.js standalone server.
     *   Cập nhật `Dockerfile` để chạy bằng server tùy chỉnh này.
-2.  [ ] **Backend SSH Bridge:**
+2.  [x] **Backend SSH Bridge:**
     *   Sử dụng `ssh2` để thiết lập kết nối từ server tới Host VPS.
     *   Pipe luồng dữ liệu (stdin/stdout) qua WebSockets.
-3.  [ ] **Frontend Terminal UI:**
+3.  [x] **Frontend Terminal UI:**
     *   Cài đặt và cấu hình `xterm.js`.
     *   Xử lý việc co dãn (Fit addon) và màu sắc theo chuẩn Dark Mode.
 

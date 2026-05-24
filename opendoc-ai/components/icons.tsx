@@ -20,6 +20,7 @@ import {
   Loader2,
   Save,
   Trash2,
+  Terminal,
 } from "lucide-react";
 
 export const Icons = {
@@ -42,6 +43,8 @@ export const Icons = {
   Check,
   Alert: AlertCircle,
   Spinner: Loader2,
+  Loader: Loader2,
+  Terminal,
   Save,
   Trash: Trash2,
   Github: ({ className }: { className?: string }) => (

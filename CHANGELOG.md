@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-24
+
+### Added
+
+- **Linux Terminal (SSH Bridge)**: Integrated a full-featured web-based terminal using `xterm.js` and `Socket.io` to manage VPS directly via SSH.
+- **Standalone Terminal Server**: Created `socket-server.ts` to handle SSH traffic independently, allowing `npm run dev` to be used for the frontend without interrupting terminal sessions.
+- **Admin Configuration UI**: New system settings page to manage global Gemini API keys and VPS SSH credentials.
+- **Environment Fallback**: Implemented automatic fallback to `.env` variables for system settings when database records are empty.
+
+### Changed
+
+- **Unified Dashboard**: Refactored the main entry point to a dynamic Dashboard that adapts content based on user roles (Admin vs. Regular User).
+- **Redirection Logic**: Optimized authentication flow to prevent infinite redirection loops and ensure users land on the appropriate workspace view.
+- **Docker Architecture**: Updated Docker configuration to run both the Next.js standalone server and the Socket.io bridge simultaneously.
+
+### Fixed
+
+- **Redirection Security**: Removed hardcoded production URLs from authentication callbacks, enabling seamless switching between localhost and production.
+- **SSH Key Normalization**: Implemented an aggressive normalization algorithm to automatically fix "Malformed OpenSSH private key" errors caused by improper copy-pasting.
+- **UI Stability**: Fixed a critical `TypeError: dimensions` in the terminal component using `requestAnimationFrame` and robust safety checks.
+- **Type Safety**: Resolved TypeScript build errors in the usage tracking logic to ensure production builds succeed.
+- **Missing Assets**: Registered missing `Terminal` and `Loader` icons in the central icon registry.
+
 ## [0.1.0] - 2026-05-16
 
 ### Added

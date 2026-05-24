@@ -29,10 +29,12 @@ export async function generateDocumentationStream(
   repoInfo: { owner: string; repo: string; fullName: string },
   tree: { path: string; type: string }[],
   priorityFiles: { path: string; content: string }[],
+  userApiKey?: string,
 ) {
-  // Using 'gemini-1.5-flash-latest' is often more reliable than just 'gemini-1.5-flash'
-  // in some SDK versions to point to the current stable production model.
-  const model = genAI.getGenerativeModel({
+  const apiKey = userApiKey || process.env.GEMINI_API_KEY || "";
+  const genAIInstance = new GoogleGenerativeAI(apiKey);
+
+  const model = genAIInstance.getGenerativeModel({
     model: "gemini-2.5-flash",
   });
 

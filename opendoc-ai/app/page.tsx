@@ -11,6 +11,6 @@ export default async function Home() {
     redirect("/login");
   }
 
-  // If authenticated, redirect to Dashboard
+  // Chuyển hướng tất cả người dùng đã đăng nhập vào Dashboard
   redirect("/dashboard");
 }

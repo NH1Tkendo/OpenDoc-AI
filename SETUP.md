@@ -82,6 +82,16 @@ CREATE TRIGGER on_project_created
     AFTER INSERT ON public.projects
     FOR EACH ROW
     EXECUTE FUNCTION public.handle_new_ai_project();
+
+-- Hàm tăng số lượt sử dụng AI của user
+CREATE OR REPLACE FUNCTION increment_usage_count(target_user_id UUID)
+RETURNS void AS $$
+BEGIN
+    UPDATE public.user_usage
+    SET usage_count = usage_count + 1
+    WHERE user_id = target_user_id;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
 ---
